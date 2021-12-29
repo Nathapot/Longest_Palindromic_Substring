@@ -6,29 +6,41 @@ const longestPalindrome = (s) => {
   if (s == null || strLength < 2) return s;
   let start = 0,
     end = 0;
+  let isOdd;
+  let lenMax;
 
-  for (let i = 0; i < s.length; i++) {
-    //เริ่มจากการ loop เข้าไปเช็กที่แต่ละตัวอักษรโดยให้ i แต่ละครั้งเป็น center
-    let isOdd = true; //เช็กว่าเป็นจำนวนคู่หรือคี่ ถ้าเป็นคี่เราก็จะเริ่มจาก middle แล้ว expand ออกไป แต่ถ้าเป็นคู่ก็เอา 2 ตัวตรงกลางเช็กว่ามันเหมือนกันแล้วก็ expand ออกไปเหมือนเดิม
-    const lenOdd = expandFromMiddle(s, i, i); //ความยาวของ Palindrome ที่เป็นเลขคี่ ถ้าเป็นคี่ก็คือมันมี midpoint 1 ตัว เราก็ให้ตำแหน่งเริ่มต้นเป็นตำแหน่งเดียวกันแล้วค่อยกระจายออกไป
-    const lenEven = expandFromMiddle(s, i, i + 1); //ความยาวของ Palindrome ที่เป็นเลขคู่ ถ้าเป็นเลขคู่คือมันจะมี Midpoint 2 ตัว เราก็จะให้ตำแหน่งเริ่มต้นเป็น i กับ i + 1 แล้วก็กระจายออกไป
-    const lenMax = Math.max(lenOdd, lenEven); //เอาค่าที่มากที่สุดระหว่าง odd, even โดยถ้าหากว่า string มีค่าเป็น odd ตอนที่มันรันของ even มันก็จะมีโอกาสน้อยมากที่จะได้ Palindrome มาสักตัว เพราะฉะนั้นยังไง lenMax ก็จะได้ค่าที่ถูกประเภทออกมา
-    if (lenMax === lenEven) {
-      //จากที่ตอนแรกเราตั้งให้ isOdd = true แต่ถ้าตอนเราเปรียบเทียบแล้วได้ lenMax ถ้าหากว่า lenMax === lenEven ก็คือมันจะเป็นประเภทของ even เพราะงั้นเราจะ turn isOdd = false
-      isOdd = false;
-    }
+  //ใช้การ mod เพื่อ check ว่า string ทีส่งเข้ามาเป็นเลขคู่หรือคี่
+  if (s.length % 2 == 0) {
+    isOdd = false; //เป็นเลขคู่
+  } else {
+    isOdd = true; //เป็นเลขคี่
+  }
 
-    if (lenMax > end - start + 1) {
-      //end - start + 1 = จะได้เท่ากับความยาวของตัว Parindrome ที่ยาวที่สุดของตอนนี้ ถ้าเป็นครั้งแรกก็จะ set ให้เป็น 0 เอาไว้ตั้งแต่ข้างบน
-      if (isOdd) {
-        // if(isOdd == true) -> ในเคสที่เป็นเลขคี่
-        start = i - Math.floor(lenMax / 2); //เมื่อ i เป็น center ก็ทำการลบส่วนของ length ที่หารด้วย 2 แล้ว โดยต้องใช้ floor เพราะจะมีเศษก็ให้ทำการปัดลง
-        end = i + Math.floor(lenMax / 2);
-      } else {
-        start = i - lenMax / 2 + 1; //center มันจะเคลื่อนไปทางซ้าย 1 ก็ทำการ add 1 เพิ่มกลับเข้ามา โดยส่วนที่เป็น even ไม่ต้องใช้ floor เพราะไม่มีเศษ
-        end = i + 1 + lenMax / 2 - 1; //center มันเลื่อนไปทางขวา 1 ก็ทำการลบ 1
+  switch (
+    isOdd //ทำการ switch case ระหว่างเลขคู่และเลขคี่
+  ) {
+    case false:
+      //เริ่มจากการ loop เข้าไปเช็กที่แต่ละตัวอักษรโดยให้ i แต่ละครั้งเป็น center
+      for (let i = 0; i < s.length; i++) {
+        lenMax = expandFromMiddle(s, i, i + 1); //ความยาวของ Palindrome ที่เป็นเลขคู่ ถ้าเป็นเลขคู่คือมันจะมี Midpoint 2 ตัว เราก็จะให้ตำแหน่งเริ่มต้นเป็น i กับ i + 1 แล้วก็กระจายออกไป
+        if (lenMax > end - start + 1) {
+          //end - start + 1 = จะได้เท่ากับความยาวของตัว Parindrome ที่ยาวที่สุดของตอนนี้ ถ้าเป็นครั้งแรกก็จะ set ตัว start, end ให้เป็น 0 เอาไว้ตั้งแต่ข้างบน
+          start = i - lenMax / 2 + 1; //center มันจะเคลื่อนไปทางซ้าย 1 ก็ทำการ add 1 เพิ่มกลับเข้ามา และจะได้ตำแหน่งเริ่มต้นของ Parindome ที่ยาวสุด ณ ตอนนั้น
+          end = i + 1 + lenMax / 2 - 1; //center มันเลื่อนไปทางขวา 1 ก็ทำการลบ 1 และจะได้ตำแหน่งท้ายสุดของ Parindome ที่ยาวสุด ณ ตอนนั้น
+        }
       }
-    }
+      break;
+    case true:
+      //เริ่มจากการ loop เข้าไปเช็กที่แต่ละตัวอักษรโดยให้ i แต่ละครั้งเป็น center
+      for (let i = 0; i < s.length; i++) {
+        lenMax = expandFromMiddle(s, i, i); //ความยาวของ Palindrome ที่เป็นเลขคี่ ถ้าเป็นคี่ก็คือมันมี midpoint 1 ตัว เราก็ให้ตำแหน่งเริ่มต้นเป็นตำแหน่งเดียวกันแล้วค่อยกระจายออกไป
+        if (lenMax > end - start + 1) {
+          //end - start + 1 = จะได้เท่ากับความยาวของตัว Parindrome ที่ยาวที่สุดของตอนนี้ ถ้าเป็นครั้งแรกก็จะ set ตัว start, end ให้เป็น 0 เอาไว้ตั้งแต่ข้างบน
+          start = i - Math.floor(lenMax / 2); //เมื่อ i เป็น center ก็ทำการลบส่วนของ length ที่หารด้วย 2 แล้ว โดยต้องใช้ floor เพราะจะมีเศษก็ให้ทำการปัดลง และจะได้ตำแหน่งเริ่มต้นของ Parindome ที่ยาวสุด ณ ตอนนั้น
+          end = i + Math.floor(lenMax / 2); //จะได้ตำแหน่งท้ายสุดของ Parindome ที่ยาวสุด ณ ตอนนั้น
+        }
+      }
+      break;
   }
   return s.substring(start, end + 1); //ส่วนนี้ก็จะได้ substring ออกมาโดยที่เราต้องให้ end + 1 เพราะว่ามันจะอยู่ในรูป [start, end) โดยเราต้องการเอา end ด้วยก็เพิ่ม 1 เข้าไป
 };
